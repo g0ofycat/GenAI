@@ -5,9 +5,9 @@ A full Transformer architecture built in Python (including both encoding and dec
 ## Architecture & Design Choices
 
 - **[GPT-2's Merge & Vocabulary Files](https://huggingface.co/openai-community/gpt2/tree/main)**
-- **Default Parameter Count (When Trained):**: *~45.6 M*
+- **Default Parameter Count (When Trained):** *~45.6 M*
 - **Fully Customizable Transformer Settings**
-- **Chatbot-Class for Inference + Foreign Character Cleanup**
+- **Chatbot class for Inference + Foreign Character Cleanup**
 - **Multiple Sampling Strategies & Tokenization Methods**
 - **GeLU Activation for Both FFN Layers**
 
