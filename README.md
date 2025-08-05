@@ -11,7 +11,7 @@ A Full transformer Architecture made in Python (Including Encoding & Decoding). 
 - **Different kinds of Sampling Strategies & Tokenization Methods**
 - **GeLU for the Activation Function for both the FFN's**
 
-**Example:**
+**Example Inferencing:**
 
 ```lua
 from path.to.class_inference import Inference 
