@@ -16,5 +16,5 @@ A Full transformer Architecture made in Python (Including Encoding & Decoding). 
 ```lua
 from path.to.class_inference import Inference 
 
-print(Inference.Chat("This is the input", 5))
+print(Inference.Chat("This is the input", 5)) # (Prompt: string, OutputtedTokens: int)
 ```
