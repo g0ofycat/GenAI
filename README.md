@@ -10,3 +10,11 @@ A Full transformer Architecture made in Python (Including Encoding & Decoding). 
 - **Full class for Chatbot-like inferencing and cleaning up Foreign characters**
 - **Different kinds of Sampling Strategies & Tokenization Methods**
 - **GeLU for the Activation Function for both the FFN's**
+
+**Example:**
+
+```lua
+from path.to.class_inference import Inference 
+
+print(Inference.Chat("This is the input", 5))
+```
