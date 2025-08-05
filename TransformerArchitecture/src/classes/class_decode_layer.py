@@ -22,7 +22,6 @@ class DecodeLayer:
         self.W2 = np.random.randn(self.d_ff, self.d_model) * 0.01
         self.b2 = np.zeros(self.d_model)
 
-    @staticmethod
     def generate_causal_mask(seq_len: int) -> np.ndarray:
         return np.triu(np.ones((seq_len, seq_len), dtype=bool), k=1)
   
