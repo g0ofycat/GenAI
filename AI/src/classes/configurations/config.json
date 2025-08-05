@@ -1,0 +1,36 @@
+{
+  "model": {
+    "d_model": 512,
+    "num_layers": 6,
+    "attention_heads": 8,
+    "vocab_size": 50296
+  },
+  "training": {
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "num_epochs": 10,
+    "clip_grad_norm": 1.0,
+    "weight_decay": 0.01,
+    "dropout": 0.1
+  },
+  "tokenizer": {
+    "vocab_path": "C:/Users/clint/GenAI/AI/files/vocab.json",
+    "merges_path": "C:/Users/clint/GenAI/AI/files/merges.txt",
+    "lowercase": false,
+    "tokenizer_type": "bpe",
+    "bpe_seperator": "\u0120"
+  },
+  "generation": {
+    "base_new_tokens": 20,
+    "stop_token": "[SEP]",
+    "sampling_strategy": "temperature",
+    "top_k": 35,
+    "top_p": 0.9,
+    "temperature": 0.1
+  },
+  "chatbot": {
+    "max_token_input": 1200,
+    "system_prompt": "You are an AI model agent that is meant to help people with their problems. Be respectful and precise with your responses.",
+    "MAX_PROMPT_HISTORY": 5
+  }
+}
