@@ -1,6 +1,6 @@
 # Transformer Architecture (AI)
 
-A full Transformer architecture built in Python (including both encoding and decoding). This side project sharpens my ML/AI skills; I plan to optimize and refactor it further, and potentially train it.
+A full Transformer architecture built in Python (including both encoding and decoding). Side project.
 
 ## Architecture & Design Choices
 
@@ -14,7 +14,13 @@ A full Transformer architecture built in Python (including both encoding and dec
 **Example Inference (prompt: string, output_tokens: int):**
 
 ```lua
-from path.to.class_inference import Inference 
+from path.to.class_inference import Inference
 
 print(Inference.Chat("This is the input", 5))
 ```
+
+## TODO 
+
+- [x] Create a full Transformer
+- [ ] Revise & Use proper Weight & Bias initialization before I train it
+- [ ] Polish
