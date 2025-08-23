@@ -14,8 +14,8 @@
     "dropout": 0.1
   },
   "tokenizer": {
-    "vocab_path": "C:/Users/clint/GenAI/AI/files/vocab.json",
-    "merges_path": "C:/Users/clint/GenAI/AI/files/merges.txt",
+    "vocab_path": "../../../files/vocab.json",
+    "merges_path": "../../../files/merges.txt",
     "lowercase": false,
     "tokenizer_type": "bpe",
     "bpe_seperator": "\u0120"
