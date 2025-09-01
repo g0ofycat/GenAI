@@ -8,26 +8,23 @@ from configurations.class_LM_config import config
 class Transformer:
     def __init__(self):
         self.d_model = config['model']['d_model']
-        self.learning_rate = config['training']['learning_rate']
-        self.batch_size = config['training']['batch_size']
         self.attention_heads = config['model']['attention_heads']
         self.num_layers = config['model']['num_layers']
-        self.temperature = config['generation']['temperature']
         self.vocab_size = config['model']['vocab_size']
-        self.max_token_input = config['chatbot']['max_token_input']
-        
+
+        self.learning_rate = config['training']['learning_rate']
+        self.batch_size = config['training']['batch_size']
+
+        self.temperature = config['generation']['temperature']
         self.top_k = config['generation']['top_k']
         self.top_p = config['generation']['top_p']
-        
         self.sampling_strategy = config['generation']['sampling_strategy']
-        
+        self.max_token_input = config['chatbot']['max_token_input']
+
         self.tokenizer = Tokenizer()
-
         self.embedding = np.random.randn(self.vocab_size, self.d_model) * 0.01
-
         self.encoder_layers = [EncoderLayer() for _ in range(self.num_layers)]
         self.decoder_layers = [DecodeLayer() for _ in range(self.num_layers)]
-        
         self.output_layer = np.random.randn(self.d_model, self.vocab_size) * 0.01
 
     def encode_input(self, sentence: str) -> tuple[list[int], np.ndarray]: # VECTOR MATRIX (R x C): d_model x tokens

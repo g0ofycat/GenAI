@@ -1,5 +1,5 @@
-from class_tokenizer import Tokenizer
-from class_transformer import Transformer
+from .class_tokenizer import Tokenizer
+from .class_transformer import Transformer
 from configurations.class_LM_config import config
 
 tokenizer = Tokenizer()
@@ -8,81 +8,72 @@ transformer = Transformer()
 class Inference:
     chat_history = []
 
-    @staticmethod
-    def Chat(user_input: str, max_tokens: int = config['generation']['base_new_tokens']) -> str:
-        if len(Inference.chat_history) > config['chatbot']['MAX_PROMPT_HISTORY']:
-            Inference.chat_history = Inference.chat_history[-config['chatbot']['MAX_PROMPT_HISTORY']:]
+    _SPECIAL_TOKENS = {
+        "[UNK]", "[PAD]", "[BOS]", "[EOS]", "[MASK]", "[CLS]", "[SEP]",
+        "<|endoftext|>", "<|startoftext|>", "<|system|>", "<|user|>", "<|assistant|>",
+        "<|im_start|>", "<|im_end|>", "[INST]", "[/INST]", "<<SYS>>", "<</SYS>>",
+        "[CODE]", "[/CODE]", "[PYTHON]", "[/PYTHON]", "[JAVASCRIPT]", "[/JAVASCRIPT]",
+        "[HTML]", "[/HTML]", "[MATH]", "[/MATH]", "[THINKING]", "[/THINKING]",
+        "<|tool_call|>", "<|tool_response|>", "[FUNCTION]", "[/FUNCTION]",
+        "[JSON]", "[/JSON]", "[SUMMARY]", "[/SUMMARY]", "[CONTEXT]", "[/CONTEXT]"
+    }
 
-        prompt = Inference._build_prompt(user_input)
+    @classmethod
+    def Chat(cls, user_input: str, max_tokens: int = config['generation']['base_new_tokens']) -> str:
+        max_history = config['chatbot']['MAX_PROMPT_HISTORY']
+        if len(cls.chat_history) > max_history:
+            cls.chat_history = cls.chat_history[-max_history:]
 
-        full_output = Inference._generate(prompt, max_tokens)
-        response = Inference._extract_bot_response(full_output)
+        prompt = cls._build_prompt(user_input)
+        full_output = cls._generate(prompt, max_tokens)
+        response = cls._extract_bot_response(full_output)
 
-        Inference.chat_history.append({"user": user_input, "bot": response})
-
+        cls.chat_history.append({"user": user_input, "bot": response})
         return response
 
-    @staticmethod
-    def Infer(sentence: str, max_tokens: int = config['generation']['base_new_tokens']) -> str:
-        return Inference._generate(sentence, max_tokens)
+    @classmethod
+    def Infer(cls, text: str, max_tokens: int = config['generation']['base_new_tokens']) -> str:
+        return cls._generate(text, max_tokens)
 
-    @staticmethod
-    def _generate(prompt: str, max_tokens: int) -> str:
+    @classmethod
+    def _generate(cls, prompt: str, max_tokens: int) -> str:
         result_ids = transformer.generate_response(prompt, max_tokens)
-        
         decoded = tokenizer.decode(result_ids)
 
         if isinstance(decoded, list):
-            decoded = ''.join(str(token) for token in decoded)
+            decoded = ''.join(map(str, decoded))
 
-        special_tokens = [
-            "[UNK]", "[PAD]", "[BOS]", "[EOS]", "[MASK]", "[CLS]", "[SEP]",
-            "<|endoftext|>", "<|startoftext|>", "<|system|>", "<|user|>", "<|assistant|>",
-            "<|im_start|>", "<|im_end|>", "[INST]", "[/INST]", "<<SYS>>", "<</SYS>>",
-            "[CODE]", "[/CODE]", "[PYTHON]", "[/PYTHON]", "[JAVASCRIPT]", "[/JAVASCRIPT]",
-            "[HTML]", "[/HTML]", "[MATH]", "[/MATH]", "[THINKING]", "[/THINKING]",
-            "<|tool_call|>", "<|tool_response|>", "[FUNCTION]", "[/FUNCTION]",
-            "[JSON]", "[/JSON]", "[SUMMARY]", "[/SUMMARY]", "[CONTEXT]", "[/CONTEXT]"
-        ]
-
-        for token in special_tokens:
+        for token in cls._SPECIAL_TOKENS:
             decoded = decoded.replace(token, '')
 
-        if '\u0120' in decoded:
-            decoded = decoded.replace('\u0120', ' ')
+        return decoded.replace('\u0120', ' ').strip()
 
-        return decoded.strip()
+    @classmethod
+    def _build_prompt(cls, user_input: str) -> str:
+        system_prompt = config['chatbot']['system_prompt']
+        history = "\n".join(f"User: {turn['user']}\nBot: {turn['bot']}" for turn in cls.chat_history)
+        return f"{system_prompt}\n\n{history}\nUser: {user_input}\nBot: "
 
-    @staticmethod
-    def _build_prompt(user_input: str) -> str:
-        prompt = config['chatbot']['system_prompt'] + "\n\n"
-        
-        for turn in Inference.chat_history:
-            prompt += f"User: {turn['user']}\nBot: {turn['bot']}\n"
-            
-        return prompt + f"User: {user_input}\nBot: "
+    @classmethod
+    def _extract_bot_response(cls, full_output: str) -> str:
+        last_user = f"User: {cls.chat_history[-1]['user']}" if cls.chat_history else "User:"
+        parts = full_output.split(last_user)
 
-    @staticmethod
-    def _extract_bot_response(full_output: str) -> str:
-        last_turn = f"User: {Inference.chat_history[-1]['user']}" if Inference.chat_history else "User:"
-        split_output = full_output.split(last_turn)
-        
-        if len(split_output) < 2:
+        if len(parts) < 2:
             return full_output.strip()
 
-        after_last_user = split_output[-1]
-        if "Bot:" not in after_last_user:
+        after_user = parts[-1]
+        if "Bot:" not in after_user:
             return full_output.strip()
 
-        response = after_last_user.split("Bot:")[-1]
+        response = after_user.split("Bot:")[-1]
 
-        for stop_word in ["User:", "Bot:"]:
+        for stop_word in ("User:", "Bot:"):
             if stop_word in response:
                 response = response.split(stop_word)[0]
 
         return response.strip()
 
-
-    @staticmethod
-    def reset():
-        Inference.chat_history = []
+    @classmethod
+    def reset(cls):
+        cls.chat_history = []
