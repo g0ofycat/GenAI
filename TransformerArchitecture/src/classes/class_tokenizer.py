@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from configurations.class_LM_config import config
+from src.configurations.class_LM_config import config
 
 class Tokenizer:
     def __init__(self):

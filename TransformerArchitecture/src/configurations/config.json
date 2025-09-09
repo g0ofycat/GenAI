@@ -16,8 +16,8 @@
   },
 
   "tokenizer": {
-    "vocab_path": "../../../files/vocab.json",
-    "merges_path": "../../../files/merges.txt",
+    "vocab_path": "vocab.json",
+    "merges_path": "merges.txt",
     "lowercase": false,
     "tokenizer_type": "bpe",
     "bpe_seperator": "\u0120"

@@ -1,9 +1,16 @@
 import json
-from pathlib import Path
+import os
 
 def load_config():
-    config_path = Path(__file__).resolve().parent / "config.json"
-    with config_path.open("r", encoding="utf-8") as f:
-        return json.load(f)
+    config_dir = os.path.dirname(__file__)
+    project_root = os.path.dirname(os.path.dirname(config_dir))
+    
+    with open(os.path.join(config_dir, 'config.json'), 'r') as f:
+        config = json.load(f)
+
+    config['tokenizer']['vocab_path'] = os.path.join(project_root, 'files', config['tokenizer']['vocab_path'])
+    config['tokenizer']['merges_path'] = os.path.join(project_root, 'files', config['tokenizer']['merges_path'])
+    
+    return config
 
 config = load_config()

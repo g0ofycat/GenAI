@@ -1,6 +1,6 @@
 import numpy as np
-from class_helper_functions import HelperFunctions
-from configurations.class_LM_config import config
+from src.classes.class_helper_functions import HelperFunctions
+from src.configurations.class_LM_config import config
 
 class DecodeLayer:
     def __init__(self):
@@ -22,7 +22,7 @@ class DecodeLayer:
         self.W2 = np.random.randn(self.d_ff, self.d_model) * 0.01
         self.b2 = np.zeros(self.d_model)
 
-    def generate_causal_mask(seq_len: int) -> np.ndarray:
+    def generate_causal_mask(self, seq_len: int) -> np.ndarray:
         return np.triu(np.ones((seq_len, seq_len), dtype=bool), k=1)
   
     def feedforward(self, x):

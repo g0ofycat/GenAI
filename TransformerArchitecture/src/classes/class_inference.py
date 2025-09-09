@@ -1,6 +1,6 @@
-from .class_tokenizer import Tokenizer
-from .class_transformer import Transformer
-from configurations.class_LM_config import config
+from src.classes.class_tokenizer import Tokenizer
+from src.classes.class_transformer import Transformer
+from src.configurations.class_LM_config import config
 
 tokenizer = Tokenizer()
 transformer = Transformer()

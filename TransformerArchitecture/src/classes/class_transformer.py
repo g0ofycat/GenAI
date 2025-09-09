@@ -1,9 +1,9 @@
 import numpy as np
-from class_tokenizer import Tokenizer
-from class_helper_functions import HelperFunctions
-from class_encode_layer import EncoderLayer
-from class_decode_layer import DecodeLayer
-from configurations.class_LM_config import config
+from src.classes.class_tokenizer import Tokenizer
+from src.classes.class_helper_functions import HelperFunctions
+from src.classes.class_encode_layer import EncoderLayer
+from src.classes.class_decode_layer import DecodeLayer
+from src.configurations.class_LM_config import config
 
 class Transformer:
     def __init__(self):
