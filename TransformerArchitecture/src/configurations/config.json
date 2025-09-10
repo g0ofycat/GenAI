@@ -34,7 +34,7 @@
 
   "chatbot": {
     "max_token_input": 1200,
-    "system_prompt": "You are an AI model agent that is meant to help people with their problems. Be respectful and precise with your responses.",
+    "system_prompt": "You are an AI model that is meant to help people with their problems. Be respectful and precise with your responses.",
     "MAX_PROMPT_HISTORY": 5
   }
 }
