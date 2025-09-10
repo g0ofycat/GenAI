@@ -10,26 +10,18 @@ class Inference:
     _tokenizer = None
     _transformer = None
 
-    _SPECIAL_TOKENS = {
-        "[UNK]", "[PAD]", "[BOS]", "[EOS]", "[MASK]", "[CLS]", "[SEP]",
-        "<|endoftext|>", "<|startoftext|>", "<|system|>", "<|user|>", "<|assistant|>",
-        "<|im_start|>", "<|im_end|>", "[INST]", "[/INST]", "<<SYS>>", "<</SYS>>",
-        "[CODE]", "[/CODE]", "[PYTHON]", "[/PYTHON]", "[JAVASCRIPT]", "[/JAVASCRIPT]",
-        "[HTML]", "[/HTML]", "[MATH]", "[/MATH]", "[THINKING]", "[/THINKING]",
-        "<|tool_call|>", "<|tool_response|>", "[FUNCTION]", "[/FUNCTION]",
-        "[JSON]", "[/JSON]", "[SUMMARY]", "[/SUMMARY]", "[CONTEXT]", "[/CONTEXT]"
-    }
-
     @classmethod
     def _get_tokenizer(cls):
         if cls._tokenizer is None:
             cls._tokenizer = Tokenizer()
+            
         return cls._tokenizer
 
     @classmethod
     def _get_transformer(cls):
         if cls._transformer is None:
             cls._transformer = Transformer()
+
         return cls._transformer
 
     @classmethod
@@ -41,13 +33,15 @@ class Inference:
     def Chat(cls, user_input: str, max_tokens: Optional[int] = None) -> str:
         if not user_input or not user_input.strip():
             raise ValueError("User input cannot be empty or whitespace only")
-        
+
         max_tokens = max_tokens or config['generation']['base_new_tokens']
+
         if not isinstance(max_tokens, int) or max_tokens <= 0:
             raise ValueError("max_tokens must be a positive integer")
 
         with cls._lock:
             max_history = config['chatbot']['MAX_PROMPT_HISTORY']
+
             if len(cls._chat_history) > max_history:
                 cls._chat_history = cls._chat_history[-max_history:]
 
@@ -70,6 +64,7 @@ class Inference:
             raise ValueError("Input text cannot be empty or whitespace only")
         
         max_tokens = max_tokens or config['generation']['base_new_tokens']
+
         if not isinstance(max_tokens, int) or max_tokens <= 0:
             raise ValueError("max_tokens must be a positive integer")
         
@@ -90,10 +85,7 @@ class Inference:
             if isinstance(decoded, list):
                 decoded = ''.join(map(str, decoded))
 
-            for token in cls._SPECIAL_TOKENS:
-                decoded = decoded.replace(token, '')
-
-            return decoded.replace('\u0120', ' ').strip()
+            return decoded.replace(config['tokenizer']['bpe_seperator'], ' ').strip()
         
         except Exception as e:
             raise RuntimeError(f"Generation process failed: {e}")
@@ -102,7 +94,9 @@ class Inference:
     def _build_prompt(cls, user_input: str) -> str:
         try:
             system_prompt = config['chatbot']['system_prompt']
+
             history = "\n".join(f"User: {turn['user']}\nBot: {turn['bot']}" for turn in cls._chat_history)
+
             return f"{system_prompt}\n\n{history}\nUser: {user_input}\nBot: "
         except KeyError as e:
             raise RuntimeError(f"Missing configuration key: {e}")

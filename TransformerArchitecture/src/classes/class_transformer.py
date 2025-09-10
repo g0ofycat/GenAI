@@ -66,6 +66,7 @@ class Transformer:
             token_ids.append(next_token)
 
             stop_token_id = self.tokenizer.vocab.get(config['generation']['stop_token'], None)
+            
             if next_token == stop_token_id:
                 break
 

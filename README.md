@@ -11,9 +11,9 @@ A full Transformer architecture built in Python (including both encoding and dec
 - **Multiple Sampling Strategies & Tokenization Methods**
 - **GeLU Activation for Both FFN Layers**
 
-**Example Inference (prompt: string, output_tokens: int):**
+**Example Inference (prompt: string, output_tokens?: int):**
 
-```lua
+```py
 from path.to.class_inference import Inference
 
 print(Inference.Chat("This is the input", 5))

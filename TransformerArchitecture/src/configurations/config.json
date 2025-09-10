@@ -3,7 +3,7 @@
     "d_model": 512,
     "num_layers": 6,
     "attention_heads": 8,
-    "vocab_size": 50296
+    "vocab_size": 50271
   },
   
   "training": {
@@ -25,7 +25,7 @@
 
   "generation": {
     "base_new_tokens": 20,
-    "stop_token": "[SEP]",
+    "stop_token": "<|endoftext|>",
     "sampling_strategy": "temperature",
     "top_k": 35,
     "top_p": 0.9,
