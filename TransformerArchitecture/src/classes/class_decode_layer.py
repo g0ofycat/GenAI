@@ -47,7 +47,7 @@ class DecodeLayer:
                 x_kv = encoder_output,
                 num_heads = self.num_heads,
                 d_model = self.d_model,
-                mask = True
+                mask = None
             )
             
             x = HelperFunctions.LayerNorm(x + cross_attn_out, self.d_model, self.gamma2, self.beta2)

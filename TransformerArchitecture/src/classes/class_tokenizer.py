@@ -32,6 +32,9 @@ class Tokenizer:
         self.tokenizer_type = config["tokenizer"]["tokenizer_type"].lower()
         self.bpe_seperator = config["tokenizer"]["bpe_seperator"]
 
+        if "[UNK]" not in self.vocab:
+            raise ValueError("Vocabulary must contain '[UNK]' token for handling unknown tokens")
+
         valid_types = {"whitespace", "char", "bpe"}
 
         if self.tokenizer_type not in valid_types:
@@ -110,9 +113,6 @@ class Tokenizer:
         tokens = []
         
         for token in tokenized_text:
-            if token is None:
-                continue
-                
             if token in self.vocab:
                 tokens.append(self.vocab[token])
             else:
@@ -127,9 +127,6 @@ class Tokenizer:
         decoded_tokens = []
         
         for token_id in token_ids:
-            if token_id is None:
-                continue
-                
             if not isinstance(token_id, int):
                 try:
                     token_id = int(token_id)
@@ -137,7 +134,10 @@ class Tokenizer:
                     print(f"Warning: Invalid token_id type: {type(token_id)}, skipping")
                     continue
 
-            if token_id in self.id_to_token:
+            if token_id < 0 or token_id >= len(self.id_to_token):
+                print(f"Warning: token_id {token_id} out of vocabulary range, using [UNK]")
+                decoded_tokens.append("[UNK]")
+            elif token_id in self.id_to_token:
                 decoded_tokens.append(self.id_to_token[token_id])
             else:
                 print(f"Warning: Unknown token_id {token_id}, using [UNK]")

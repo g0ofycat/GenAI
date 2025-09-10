@@ -106,8 +106,7 @@ class HelperFunctions:
     def CrossEntropyLoss(actual: np.ndarray, predicted: np.ndarray) -> float:
         epsilon = 1e-12
         predicted = np.clip(predicted, epsilon, 1. - epsilon)
-        loss = -(actual * np.log(predicted) + (1 - actual) * np.log(1 - predicted))
-        return loss.mean()
+        return -np.sum(actual * np.log(predicted + epsilon))
 
     @staticmethod
     def PositionalEncoding(seq_len: int, d_model: int) -> np.ndarray:
@@ -116,7 +115,7 @@ class HelperFunctions:
             for i in range(0, d_model, 2):
                 pos_enc[pos, i] = math.sin(pos / (10000 ** ((2 * i) / d_model)))
                 if i + 1 < d_model:
-                    pos_enc[pos, i + 1] = math.cos(pos / (10000 ** ((2 * (i + 1)) / d_model)))
+                    pos_enc[pos, i + 1] = math.cos(pos / (10000 ** ((2 * i) / d_model)))
         return pos_enc
     
     @staticmethod
