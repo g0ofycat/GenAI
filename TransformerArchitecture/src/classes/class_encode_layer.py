@@ -1,6 +1,7 @@
 import numpy as np
 from src.classes.class_helper_functions import HelperFunctions
 from src.configurations.class_LM_config import config
+
 class EncoderLayer:
     def __init__(self):
         self.d_model = config['model']['d_model']
