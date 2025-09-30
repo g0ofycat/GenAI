@@ -1,50 +1,53 @@
 import json
 import os
 import re
+from typing import Dict, List, Set, Tuple
 from src.configurations.class_LM_config import config
 
 class Tokenizer:
     def __init__(self):
-
-        VocabFile = config["tokenizer"]["vocab_path"]
- 
-        if VocabFile.endswith('.json'):
-            with open(VocabFile, "r", encoding="utf-8") as f:
-                self.vocab = json.load(f)
-        else:
-            with open(VocabFile, "r", encoding="utf-8") as f:
-                tokens = f.read().splitlines()
-                self.vocab = {token: idx for idx, token in enumerate(tokens)}
-
-        merges_path = config["tokenizer"]["merges_path"]
-        
-        if os.path.exists(merges_path):
-            with open(merges_path, "r", encoding="utf-8") as f:
-                lines = f.read().splitlines()
-                start_idx = 1 if lines and lines[0].startswith('#version') else 0
-                self.merges = [tuple(line.strip().split()) for line in lines[start_idx:] 
-                              if line and not line.startswith("#")]
-        else:
-            self.merges = []
-
-        self.id_to_token = {idx: token for token, idx in self.vocab.items()}
+        self.vocab = self._load_vocab(config["tokenizer"]["vocab_path"])
+        self.merges = self._load_merges(config["tokenizer"]["merges_path"])
+        self.id_to_token = {idx: tok for tok, idx in self.vocab.items()}
         self.lowercase = config["tokenizer"]["lowercase"]
         self.tokenizer_type = config["tokenizer"]["tokenizer_type"].lower()
-        self.bpe_seperator = config["tokenizer"]["bpe_seperator"]
+        self.bpe_separator = config["tokenizer"]["bpe_seperator"]
 
-        if "[UNK]" not in self.vocab:
-            raise ValueError("Vocabulary must contain '[UNK]' token for handling unknown tokens")
+        self._validate()
 
-        valid_types = {"whitespace", "char", "bpe"}
+    # ======== LOADING ========
 
-        if self.tokenizer_type not in valid_types:
-            raise ValueError(f"Invalid Tokenizer Type: {self.tokenizer_type}")
+    def _load_vocab(self, path: str) -> Dict[str, int]:
+        with open(path, "r", encoding="utf-8") as f:
+            if path.endswith(".json"):
+                return json.load(f)
+            return {tok: idx for idx, tok in enumerate(f.read().splitlines())}
+
+    def _load_merges(self, path: str) -> List[Tuple[str, str]]:
+        if not os.path.exists(path):
+            return []
         
-    def _merge_pair(self, tokens: list, pair) -> list[str]:
+        with open(path, "r", encoding="utf-8") as f:
+            lines = f.read().splitlines()
+        start = 1 if lines and lines[0].startswith("#version") else 0
+        return [tuple(line.split()) for line in lines[start:] if line and not line.startswith("#")]
+
+    # ======== VALIDATION ========
+
+    def _validate(self):
+        if "[UNK]" not in self.vocab:
+            raise ValueError("Vocabulary must contain '[UNK]'")
+        if self.tokenizer_type not in {"whitespace", "char", "bpe"}:
+            raise ValueError(f"Invalid tokenizer type: {self.tokenizer_type}")
+
+    # ======== HELPERS ========
+
+    def _merge_pair(self, tokens: List[str], pair: Tuple[str, str]) -> List[str]:
         merged_tokens = []
         i = 0
+
         while i < len(tokens):
-            if i < len(tokens) - 1 and tokens[i] == pair[0] and tokens[i + 1] == pair[1]: # "If the current index of the token we're on is the same as the pair as well as the index after then append both"
+            if i < len(tokens) - 1 and tokens[i] == pair[0] and tokens[i + 1] == pair[1]:
                 merged_tokens.append(tokens[i] + tokens[i + 1])
                 i += 2
             else:
@@ -52,17 +55,28 @@ class Tokenizer:
                 i += 1
         return merged_tokens
 
-    def _get_pairs(self, tokens: list) -> set[tuple]:
-        pairs = set()
-        for i in range(len(tokens) - 1):
-            pairs.add((tokens[i], tokens[i + 1]))
-        return pairs
-        
-    def _split_on_punctuation(self, text: str) -> list[str]:
-        tokens = re.findall(r'\w+|[^\w\s]', text)
-        return tokens
-    
-    def ApplyBPE(self, text: str) -> list[str]:
+    def _get_pairs(self, tokens: List[str]) -> Set[Tuple[str, str]]:
+        return { (tokens[i], tokens[i+1]) for i in range(len(tokens)-1) }
+
+    def _split_on_punctuation(self, text: str) -> List[str]:
+        return re.findall(r'\w+|[^\w\s]', text)
+
+    # ======== TOKENIZATION ========
+
+    def tokenize(self, text: str) -> List[str]:
+        if self.lowercase:
+            text = text.lower()
+
+        method = getattr(self, f"_tokenize_{self.tokenizer_type}")
+        return method(text)
+
+    def _tokenize_whitespace(self, text: str) -> List[str]:
+        return re.findall(r"\w+|[^\w\s]", text, re.UNICODE)
+
+    def _tokenize_char(self, text: str) -> List[str]:
+        return list(text)
+
+    def _tokenize_bpe(self, text: str) -> List[str]:
         words = self._split_on_punctuation(text)
         final_tokens = []
 
@@ -85,7 +99,7 @@ class Tokenizer:
                     tokens = self._merge_pair(tokens, candidate)
   
                 if i > 0 and len(tokens) > 0:
-                    tokens[0] = self.bpe_seperator + tokens[0]
+                    tokens[0] = self.bpe_separator + tokens[0]
                     
             else:
                 tokens = [word]
@@ -93,18 +107,10 @@ class Tokenizer:
             final_tokens.extend(tokens)
 
         return final_tokens
-    
-    def tokenize(self, text: str) -> list[str]:
-        if self.lowercase:
-            text = text.lower()
-        if self.tokenizer_type == "whitespace":
-            return re.findall(r"\w+|[^\w\s]", text, re.UNICODE)
-        elif self.tokenizer_type == "char":
-            return list(text)
-        elif self.tokenizer_type == "bpe":
-            return self.ApplyBPE(text)
-        
-    def encode(self, text: str) -> list[int]:
+
+    # ======== ENCODING / DECODING ========
+
+    def encode(self, text: str) -> List[int]:
         if not text:
             return []
         
@@ -120,7 +126,7 @@ class Tokenizer:
         
         return tokens
 
-    def decode(self, token_ids: list[int]) -> list[str]:
+    def decode(self, token_ids: List[int]) -> List[str]:
         if not token_ids:
             return []
         

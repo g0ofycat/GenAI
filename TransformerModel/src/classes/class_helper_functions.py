@@ -2,6 +2,8 @@ import math
 import numpy as np
 
 class HelperFunctions:
+    # ======== ACTIVATION FUNCTIONS ========
+
     @staticmethod
     def Softmax(inputs: list[float]) -> list[float]:
         if isinstance(inputs, np.ndarray):
@@ -18,6 +20,8 @@ class HelperFunctions:
     def GeLU(x: np.ndarray) -> np.ndarray:
         return 0.5 * x * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x**3)))
     
+    # ======== ATTENTION MECHANISM ========
+
     @staticmethod
     def Self_Attention(Q: np.ndarray, K: np.ndarray, V: np.ndarray, mask = None) -> np.ndarray:
         d_k = Q.shape[-1]
@@ -34,35 +38,38 @@ class HelperFunctions:
         return output
     
     @staticmethod
-    def MultiHeadAttention(x: np.ndarray, num_heads: int, d_model: int, mask = None) -> np.ndarray:
+    def MultiHeadAttention(x: np.ndarray, num_heads: int, d_model: int, mask = None, Q: np.ndarray = None, K: np.ndarray = None, V: np.ndarray = None) -> np.ndarray:
         assert d_model % num_heads == 0, "d_model must be divisible by num_heads"
         d_k = d_model // num_heads
-        seq_len = x.shape[0]
+        
+        if Q is None:
+            seq_len = x.shape[0]
+            W_q = np.random.randn(d_model, d_model)
+            W_k = np.random.randn(d_model, d_model)
+            W_v = np.random.randn(d_model, d_model)
+            W_o = np.random.randn(d_model, d_model)
+            Q = x @ W_q
+            K = x @ W_k
+            V = x @ W_v
+        else:
+            W_o = np.random.randn(d_model, d_model)
+        
+        seq_len = Q.shape[0]
+        total_seq_len = K.shape[0]
 
-        W_q = np.random.randn(d_model, d_model)
-        W_k = np.random.randn(d_model, d_model)
-        W_v = np.random.randn(d_model, d_model)
-        W_o = np.random.randn(d_model, d_model)
-
-        Q = x @ W_q
-        K = x @ W_k
-        V = x @ W_v
-
-        def split_heads(tensor: np.ndarray) -> np.ndarray:
+        def split_heads(tensor: np.ndarray, seq_len: int) -> np.ndarray:
             return tensor.reshape(seq_len, num_heads, d_k).transpose(1, 0, 2)
 
-        Q_heads = split_heads(Q)
-        K_heads = split_heads(K)
-        V_heads = split_heads(V)
+        Q_heads = split_heads(Q, seq_len)
+        K_heads = split_heads(K, total_seq_len)
+        V_heads = split_heads(V, total_seq_len)
 
         heads = []
-
         for i in range(num_heads):
             attn = HelperFunctions.Self_Attention(Q_heads[i], K_heads[i], V_heads[i], mask)
             heads.append(attn)
 
         concatenated = np.concatenate(heads, axis=-1)
-
         output = concatenated @ W_o
 
         return output
@@ -101,6 +108,8 @@ class HelperFunctions:
         output = concatenated @ W_o
 
         return output
+
+    # ======== MISC ========
 
     @staticmethod
     def CrossEntropyLoss(actual: np.ndarray, predicted: np.ndarray) -> float:

@@ -5,36 +5,19 @@ from typing import List, Dict, Optional
 import threading
 
 class Inference:
+    # ======== DATA ========
+
     _chat_history: List[Dict[str, str]] = []
     _lock = threading.Lock()
     _tokenizer = None
     _transformer = None
+        
+    # ======== CHATTING ========
 
     @classmethod
-    def _get_tokenizer(cls):
-        if cls._tokenizer is None:
-            cls._tokenizer = Tokenizer()
-            
-        return cls._tokenizer
-
-    @classmethod
-    def _get_transformer(cls):
-        if cls._transformer is None:
-            cls._transformer = Transformer()
-
-        return cls._transformer
-
-    @classmethod
-    def chat_history(cls) -> List[Dict[str, str]]:
-        with cls._lock:
-            return cls._chat_history.copy()
-
-    @classmethod
-    def Chat(cls, user_input: str, max_tokens: Optional[int] = None) -> str:
+    def Chat(cls, user_input: str, max_tokens: int) -> str:
         if not user_input or not user_input.strip():
             raise ValueError("User input cannot be empty or whitespace only")
-
-        max_tokens = max_tokens or config['generation']['base_new_tokens']
 
         if not isinstance(max_tokens, int) or max_tokens <= 0:
             raise ValueError("max_tokens must be a positive integer")
@@ -59,11 +42,9 @@ class Inference:
         return response
 
     @classmethod
-    def Infer(cls, text: str, max_tokens: Optional[int] = None) -> str:
+    def Infer(cls, text: str, max_tokens: int) -> str:
         if not text or not text.strip():
             raise ValueError("Input text cannot be empty or whitespace only")
-        
-        max_tokens = max_tokens or config['generation']['base_new_tokens']
 
         if not isinstance(max_tokens, int) or max_tokens <= 0:
             raise ValueError("max_tokens must be a positive integer")
@@ -72,6 +53,8 @@ class Inference:
             return cls._generate(text, max_tokens)
         except Exception as e:
             raise RuntimeError(f"Inference generation failed: {e}")
+
+    # ======== HELPERS ========
 
     @classmethod
     def _generate(cls, prompt: str, max_tokens: int) -> str:
@@ -137,12 +120,33 @@ class Inference:
         
         except Exception:
             return full_output.strip()
+        
+    # ======== UTILITY ========
 
     @classmethod
     def reset(cls) -> None:
         with cls._lock:
             cls._chat_history = []
 
+    @classmethod
+    def get_chat_history(cls) -> List[Dict[str, str]]:
+        with cls._lock:
+            return cls._chat_history.copy()
+
+    @classmethod
+    def _get_tokenizer(cls):
+        if cls._tokenizer is None:
+            cls._tokenizer = Tokenizer()
+            
+        return cls._tokenizer
+
+    @classmethod
+    def _get_transformer(cls):
+        if cls._transformer is None:
+            cls._transformer = Transformer()
+
+        return cls._transformer
+    
     @classmethod
     def get_history_length(cls) -> int:
         with cls._lock:
