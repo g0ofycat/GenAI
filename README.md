@@ -10,9 +10,3 @@ A full Transformer model built in Python (including both encoding and decoding).
 - **Chatbot class for Inference + Foreign Character Cleanup**
 - **Multiple Sampling Strategies & Tokenization Methods**
 - **GeLU Activation for Both FFN Layers**
-
-## TODO 
-
-- [x] Create a full Transformer
-- [x] Revise & Use proper Weight & Bias initialization before I train it
-- [x] Polish
