@@ -30,10 +30,10 @@ class EncoderLayer:
     def forward(self, x: np.ndarray):
         attn_out = HelperFunctions.MultiHeadAttention(x, self.num_heads, self.d_model, mask = None)
 
-        x = HelperFunctions.LayerNorm(x + attn_out, self.d_model, self.gamma1, self.beta1)
+        x = HelperFunctions.LayerNorm(x + attn_out, self.gamma1, self.beta1)
 
         ffn_out = self.feedforward(x)
         
-        x = HelperFunctions.LayerNorm(x + ffn_out, self.d_model, self.gamma2, self.beta2)
+        x = HelperFunctions.LayerNorm(x + ffn_out, self.gamma2, self.beta2)
         
         return x

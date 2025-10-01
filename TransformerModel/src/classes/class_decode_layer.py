@@ -66,14 +66,14 @@ class DecodeLayer:
                         np.triu(np.ones((seq_len, total_seq_len), dtype=bool), k=total_seq_len - seq_len + 1)
         
         self_attn_out = HelperFunctions.MultiHeadAttention(x, self.num_heads, self.d_model, mask=causal_mask, Q=Q, K=K, V=V)
-        x = HelperFunctions.LayerNorm(x + self_attn_out, self.d_model, self.gamma1, self.beta1)
+        x = HelperFunctions.LayerNorm(x + self_attn_out, self.gamma1, self.beta1)
         
         if encoder_output is not None:
             cross_attn_out = HelperFunctions.MultiHeadCrossAttention(x, encoder_output, self.num_heads, self.d_model)
-            x = HelperFunctions.LayerNorm(x + cross_attn_out, self.d_model, self.gamma2, self.beta2)
+            x = HelperFunctions.LayerNorm(x + cross_attn_out, self.gamma2, self.beta2)
         
         ffn_out = self.feedforward(x)
-        x = HelperFunctions.LayerNorm(x + ffn_out, self.d_model, self.gamma3, self.beta3)
+        x = HelperFunctions.LayerNorm(x + ffn_out, self.gamma3, self.beta3)
         
         new_cache = (K, V) if use_cache else None
         return x, new_cache

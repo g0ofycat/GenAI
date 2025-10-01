@@ -20,6 +20,12 @@ class HelperFunctions:
     def GeLU(x: np.ndarray) -> np.ndarray:
         return 0.5 * x * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x**3)))
     
+    @staticmethod
+    def GeLU_derivative(x: np.ndarray) -> np.ndarray:
+        return 0.5 * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x**3))) + \
+        0.5 * x * (1 + 0.134145 * x**2) * np.sqrt(2 / np.pi) * \
+        (1 - np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x**3))**2)
+    
     # ======== ATTENTION MECHANISM ========
 
     @staticmethod
@@ -128,7 +134,7 @@ class HelperFunctions:
         return pos_enc
     
     @staticmethod
-    def LayerNorm(x: np.ndarray, d_model: int, gamma: np.ndarray, beta: np.ndarray, epsilon: float = 1e-5) -> np.ndarray:
+    def LayerNorm(x: np.ndarray, gamma: np.ndarray, beta: np.ndarray, epsilon: float = 1e-5) -> np.ndarray:
         mean = np.mean(x, axis=-1, keepdims=True)
         variance = np.var(x, axis=-1, keepdims=True)
 
